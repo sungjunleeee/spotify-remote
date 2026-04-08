@@ -27,6 +27,8 @@ class PlaybackManager: ObservableObject {
     func stopPolling() {
         pollingTask?.cancel()
         pollingTask = nil
+        isPlaying = false
+        currentTrack = nil
     }
 
     func togglePlayPause() {

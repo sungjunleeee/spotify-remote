@@ -6,7 +6,7 @@ import AppKit
 class SpotifyAuth: ObservableObject {
     static let shared = SpotifyAuth()
 
-    private let clientID = "YOUR_SPOTIFY_CLIENT_ID"
+    private var clientID: String { AppSettings.shared.clientID }
     private let redirectURI = "spotifycontroller://callback"
     private let scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing"
 
@@ -72,6 +72,15 @@ class SpotifyAuth: ObservableObject {
         refreshToken = nil
         tokenExpiry = nil
         isAuthenticated = false
+    }
+
+    func unauthorize() {
+        accessToken = nil
+        refreshToken = nil
+        tokenExpiry = nil
+        isAuthenticated = false
+        AppSettings.shared.clientID = ""
+        PlaybackManager.shared.stopPolling()
     }
 
     // MARK: - Private

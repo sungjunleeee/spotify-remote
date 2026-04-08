@@ -40,14 +40,22 @@ class AppSettings: ObservableObject {
         }
     }
 
+    @Published var clientID: String {
+        didSet { UserDefaults.standard.set(clientID, forKey: "spotify_client_id") }
+    }
+
+    var isSetupComplete: Bool { !clientID.isEmpty }
+
     private init() {
         showPreviousButton = UserDefaults.standard.object(forKey: "show_previous_button") as? Bool ?? false
         showNextButton = UserDefaults.standard.object(forKey: "show_next_button") as? Bool ?? true
         hideSkipButtonsWhenIdle = UserDefaults.standard.object(forKey: "hide_skip_when_idle") as? Bool ?? false
         launchAtLogin = SMAppService.mainApp.status == .enabled
+        clientID = UserDefaults.standard.string(forKey: "spotify_client_id") ?? ""
     }
 }
 
 extension Notification.Name {
     static let statusBarLayoutChanged = Notification.Name("statusBarLayoutChanged")
+    static let showSetupWindow = Notification.Name("showSetupWindow")
 }

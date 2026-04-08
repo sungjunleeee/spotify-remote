@@ -37,11 +37,11 @@ struct NowPlayingView: View {
             Image(systemName: "music.note")
                 .font(.largeTitle)
                 .foregroundStyle(.secondary)
-            Text("Not logged in")
+            Text("Setup required")
                 .font(.headline)
             GlassEffectContainer {
-                Button("Log in to Spotify") {
-                    auth.startAuthFlow()
+                Button("Open Setup") {
+                    NotificationCenter.default.post(name: .showSetupWindow, object: nil)
                 }
                 .glassEffect(.regular.tint(.green))
             }
@@ -113,17 +113,6 @@ struct NowPlayingView: View {
         Menu {
             Button("Settings…") {
                 openSettings()
-            }
-            Divider()
-            if auth.isAuthenticated {
-                Button("Log Out") {
-                    auth.logout()
-                    playback.stopPolling()
-                }
-            } else {
-                Button("Log In") {
-                    auth.startAuthFlow()
-                }
             }
             Divider()
             Button("Quit SpotifyController") {

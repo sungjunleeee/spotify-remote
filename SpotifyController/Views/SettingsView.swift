@@ -16,23 +16,30 @@ struct SettingsView: View {
                 Toggle("Hide skip buttons when nothing is playing", isOn: $settings.hideSkipButtonsWhenIdle)
             }
 
-            Section("Account") {
+            Section("Spotify") {
                 if auth.isAuthenticated {
-                    LabeledContent("Spotify") {
-                        Text("Connected")
-                            .foregroundStyle(.green)
-                    }
-                    Button("Log Out", role: .destructive) {
-                        auth.logout()
-                        PlaybackManager.shared.stopPolling()
-                    }
-                } else {
-                    LabeledContent("Spotify") {
-                        Text("Not connected")
+                    LabeledContent("Client ID") {
+                        Text(truncated(settings.clientID))
+                            .font(.system(.caption, design: .monospaced))
                             .foregroundStyle(.secondary)
                     }
-                    Button("Log In to Spotify") {
-                        auth.startAuthFlow()
+                    LabeledContent("Status") {
+                        Text("Connected").foregroundStyle(.green)
+                    }
+                    Button("Reset Setup", role: .destructive) {
+                        auth.unauthorize()
+                    }
+                } else if settings.isSetupComplete {
+                    LabeledContent("Client ID") {
+                        Text(truncated(settings.clientID))
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+                    Button("Reset Setup", role: .destructive) { auth.unauthorize() }
+                } else {
+                    Text("Not set up").foregroundStyle(.secondary)
+                    Button("Run Setup…") {
+                        NotificationCenter.default.post(name: .showSetupWindow, object: nil)
                     }
                 }
             }
@@ -46,5 +53,10 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 360)
         .padding()
+    }
+
+    private func truncated(_ id: String) -> String {
+        guard id.count > 12 else { return id }
+        return String(id.prefix(8)) + "…" + String(id.suffix(4))
     }
 }

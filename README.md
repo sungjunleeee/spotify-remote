@@ -33,7 +33,7 @@ The app lives in your menu bar. No Dock icon.
 | **Left-click** play/pause | Toggle playback |
 | **Left-click** ⏮ / ⏭ | Skip tracks |
 | **Right-click** any button | Open Now Playing popup |
-| Gear icon in popup | Settings, login/logout, quit |
+| Gear icon in popup | Settings, quit |
 
 When nothing is playing, the menu bar shows a `zzz` icon — left-click is disabled until playback starts.
 
@@ -51,16 +51,14 @@ make run
 
 ### 2. Spotify API credentials
 
-You need your own Spotify Client ID:
+On first launch, a setup window walks you through:
 
 1. Go to [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) → **Create app**
 2. Set **Redirect URI** to `spotifycontroller://callback`
 3. Enable **Web API**
-4. Copy your **Client ID** and replace the value in `SpotifyController/Spotify/SpotifyAuth.swift`:
+4. Paste your **Client ID** into the setup window and click **Connect to Spotify**
 
-```swift
-private let clientID = "YOUR_CLIENT_ID"
-```
+No source code changes needed — the client ID is saved in UserDefaults.
 
 ### 3. Available make targets
 
@@ -70,6 +68,12 @@ private let clientID = "YOUR_CLIENT_ID"
 | `make build` | Build only |
 | `make dmg` | Create distributable DMG |
 | `make clean` | Remove build artifacts |
+
+---
+
+## Known Issues
+
+- **Status bar icon positions reset on relaunch** — The previous/next track buttons may reappear in a different position each time the app launches.
 
 ---
 
