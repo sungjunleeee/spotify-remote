@@ -1,0 +1,8 @@
+.build/
+SpotifyController.app/
+SpotifyController.iconset/
+SpotifyController.icns
+dmg-tmp/
+*.dmg
+icon-option-*.svg
+.DS_Store
