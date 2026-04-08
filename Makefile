@@ -1,7 +1,7 @@
 APP_NAME = SpotifyController
 BUNDLE   = $(APP_NAME).app
 BINARY   = .build/release/$(APP_NAME)
-VERSION  = 0.1.0
+VERSION  = 0.2.0
 
 .PHONY: icons build run dmg clean
 

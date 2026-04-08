@@ -16,7 +16,7 @@ A minimal macOS menu bar app to control Spotify — including playback on remote
 
 ## Download & Install
 
-**[⬇ Download latest release](https://github.com/sungjunleeee/spotify-remote/releases/latest/download/SpotifyRemote-0.1.0.dmg)**
+**[⬇ Download latest release](https://github.com/sungjunleeee/spotify-remote/releases/latest/download/SpotifyRemote-0.2.0.dmg)**
 
 1. Open the `.dmg` file
 2. Drag **SpotifyRemote** into your Applications folder
