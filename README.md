@@ -20,7 +20,8 @@ A minimal macOS menu bar app to control Spotify — including playback on remote
 
 1. Open the `.dmg` file
 2. Drag **SpotifyRemote** into your Applications folder
-3. On first launch: right-click the app → **Open** (bypasses macOS Gatekeeper warning for unsigned apps)
+3. Double-click the app — macOS will block it on the first launch
+4. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway**
 
 ---
 
@@ -73,7 +74,7 @@ No source code changes needed — the client ID is saved in UserDefaults.
 
 ## Known Issues
 
-- **Status bar icon positions reset on relaunch** — The previous/next track buttons may reappear in a different position each time the app launches.
+- **Status bar icon positions reset on relaunch** — The previous/next track buttons may reappear in a different position each time the app launches. macOS only persists icon positions for apps distributed via the Mac App Store.
 
 ---
 
