@@ -35,8 +35,15 @@ jobs:
             -srcfolder dmg-tmp -ov -format UDZO \
             "SpotifyRemote-${{ env.VERSION }}.dmg"
 
+      - name: Extract tag annotation
+        run: |
+          git fetch --tags --force
+          echo "TAG_BODY<<EOF" >> $GITHUB_ENV
+          git tag -l --format='%(contents)' ${{ github.ref_name }} >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: SpotifyRemote-*.dmg
-          generate_release_notes: true
+          body: ${{ env.TAG_BODY }}
