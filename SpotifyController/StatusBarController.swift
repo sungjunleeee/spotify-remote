@@ -28,9 +28,14 @@ class StatusBarController {
         // Create in reverse display order: macOS inserts each new item to the LEFT
         // of previously added ones, so create right-to-left to get [⏮] [⏸] [⏭]
         // All properties must be initialized before any self method calls.
+        // Skip buttons avoid isVisible toggling — confirmed Apple bug (FB9052637)
+        // resets saved position to far left. Instead we toggle length + image + action.
         nextItem     = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        nextItem.autosaveName = "com.spotifycontroller.next"
         playPauseItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        playPauseItem.autosaveName = "com.spotifycontroller.playpause"
         previousItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        previousItem.autosaveName = "com.spotifycontroller.previous"
 
         configure(nextItem,      symbol: "forward.fill",    action: #selector(handleNext))
         configure(playPauseItem, symbol: "moon.zzz.fill",   action: #selector(handlePlayPause))
@@ -81,8 +86,38 @@ class StatusBarController {
         let isIdle = PlaybackManager.shared.currentTrack == nil
         let hideNow = AppSettings.shared.hideSkipButtonsWhenIdle && isIdle
 
-        nextItem.isVisible     = AppSettings.shared.showNextButton && !hideNow
-        previousItem.isVisible = AppSettings.shared.showPreviousButton && !hideNow
+        let showNext = AppSettings.shared.showNextButton && !hideNow
+        let showPrev = AppSettings.shared.showPreviousButton && !hideNow
+
+        // Use image toggling instead of isVisible — toggling isVisible is a confirmed
+        // Apple bug (FB9052637) that resets item position to the far left on re-show.
+        if showNext {
+            nextItem.length = NSStatusItem.squareLength
+            let img = NSImage(systemSymbolName: "forward.fill", accessibilityDescription: nil)
+            img?.isTemplate = true
+            nextItem.button?.image = img
+            nextItem.button?.action = #selector(handleNext)
+            nextItem.button?.isEnabled = true
+        } else {
+            nextItem.length = 0.0001
+            nextItem.button?.image = nil
+            nextItem.button?.action = nil
+            nextItem.button?.isEnabled = false
+        }
+
+        if showPrev {
+            previousItem.length = NSStatusItem.squareLength
+            let img = NSImage(systemSymbolName: "backward.fill", accessibilityDescription: nil)
+            img?.isTemplate = true
+            previousItem.button?.image = img
+            previousItem.button?.action = #selector(handlePrevious)
+            previousItem.button?.isEnabled = true
+        } else {
+            previousItem.length = 0.0001
+            previousItem.button?.image = nil
+            previousItem.button?.action = nil
+            previousItem.button?.isEnabled = false
+        }
     }
 
     @objc private func onSettingsChanged() {
