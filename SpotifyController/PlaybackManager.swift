@@ -62,10 +62,19 @@ class PlaybackManager: ObservableObject {
     // MARK: - Private
 
     private func fetchState() async {
-        guard let state = try? await SpotifyAPI.shared.getPlaybackState() else { return }
-        isPlaying = state.isPlaying
-        currentTrack = state.item
-        progressMs = state.progressMs ?? 0
-        deviceName = state.device?.name
+        do {
+            guard let state = try await SpotifyAPI.shared.getPlaybackState() else { return }
+            isPlaying = state.isPlaying
+            currentTrack = state.item
+            progressMs = state.progressMs ?? 0
+            deviceName = state.device?.name
+        } catch SpotifyAPIError.noActiveDevice {
+            isPlaying = false
+            currentTrack = nil
+            progressMs = 0
+            deviceName = nil
+        } catch {
+            // Network error — keep existing state, will retry on next poll
+        }
     }
 }

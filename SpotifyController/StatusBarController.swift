@@ -84,39 +84,52 @@ class StatusBarController {
 
     private func updateOptionalButtonVisibility() {
         let isIdle = PlaybackManager.shared.currentTrack == nil
-        let hideNow = AppSettings.shared.hideSkipButtonsWhenIdle && isIdle
+        let shrinkWhenIdle = AppSettings.shared.hideSkipButtonsWhenIdle && isIdle
 
-        let showNext = AppSettings.shared.showNextButton && !hideNow
-        let showPrev = AppSettings.shared.showPreviousButton && !hideNow
+        applyVisibility(
+            item: nextItem,
+            symbol: "forward.fill",
+            action: #selector(handleNext),
+            enabled: AppSettings.shared.showNextButton,
+            shrink: shrinkWhenIdle
+        )
+        applyVisibility(
+            item: previousItem,
+            symbol: "backward.fill",
+            action: #selector(handlePrevious),
+            enabled: AppSettings.shared.showPreviousButton,
+            shrink: shrinkWhenIdle
+        )
+    }
 
-        // Use image toggling instead of isVisible — toggling isVisible is a confirmed
-        // Apple bug (FB9052637) that resets item position to the far left on re-show.
-        if showNext {
-            nextItem.length = NSStatusItem.squareLength
-            let img = NSImage(systemSymbolName: "forward.fill", accessibilityDescription: nil)
-            img?.isTemplate = true
-            nextItem.button?.image = img
-            nextItem.button?.action = #selector(handleNext)
-            nextItem.button?.isEnabled = true
-        } else {
-            nextItem.length = 0.0001
-            nextItem.button?.image = nil
-            nextItem.button?.action = nil
-            nextItem.button?.isEnabled = false
+    // When a button is opted out entirely, hide it via isVisible so it takes no space.
+    // When it's opted in but idle-hiding is active, use the shrink trick instead —
+    // toggling isVisible is a confirmed Apple bug (FB9052637) that resets item position
+    // to the far left on re-show, so we avoid it for the frequently-toggled idle case.
+    private func applyVisibility(
+        item: NSStatusItem,
+        symbol: String,
+        action: Selector,
+        enabled: Bool,
+        shrink: Bool
+    ) {
+        guard enabled else {
+            item.isVisible = false
+            return
         }
-
-        if showPrev {
-            previousItem.length = NSStatusItem.squareLength
-            let img = NSImage(systemSymbolName: "backward.fill", accessibilityDescription: nil)
-            img?.isTemplate = true
-            previousItem.button?.image = img
-            previousItem.button?.action = #selector(handlePrevious)
-            previousItem.button?.isEnabled = true
+        item.isVisible = true
+        if shrink {
+            item.length = 0.0001
+            item.button?.image = nil
+            item.button?.action = nil
+            item.button?.isEnabled = false
         } else {
-            previousItem.length = 0.0001
-            previousItem.button?.image = nil
-            previousItem.button?.action = nil
-            previousItem.button?.isEnabled = false
+            item.length = NSStatusItem.squareLength
+            let img = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+            img?.isTemplate = true
+            item.button?.image = img
+            item.button?.action = action
+            item.button?.isEnabled = true
         }
     }
 

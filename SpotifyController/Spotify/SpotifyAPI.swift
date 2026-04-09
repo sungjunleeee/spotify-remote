@@ -1,11 +1,28 @@
 import Foundation
 
+enum SpotifyAPIError: Error {
+    case noActiveDevice
+}
+
 class SpotifyAPI {
     nonisolated(unsafe) static let shared = SpotifyAPI()
     private init() {}
 
+    /// Throws `SpotifyAPIError.noActiveDevice` when Spotify has no active player (204).
+    /// Returns `nil` on auth/decode failure. Throws network errors.
     func getPlaybackState() async throws -> SpotifyPlaybackState? {
-        guard let data = try await request("GET", "/me/player") else { return nil }
+        guard let token = await SpotifyAuth.shared.getValidToken() else { return nil }
+
+        var req = URLRequest(url: URL(string: "https://api.spotify.com/v1/me/player")!)
+        req.httpMethod = "GET"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: req)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+
+        if status == 204 { throw SpotifyAPIError.noActiveDevice }
+        if status == 401 { await SpotifyAuth.shared.logout(); return nil }
+
         return try? JSONDecoder().decode(SpotifyPlaybackState.self, from: data)
     }
 
