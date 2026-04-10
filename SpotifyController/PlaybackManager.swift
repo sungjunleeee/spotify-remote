@@ -7,6 +7,9 @@ class PlaybackManager: ObservableObject {
 
     @Published var isPlaying = false
     @Published var currentTrack: SpotifyTrack?
+    /// Survives a 204 (device inactive) so the play icon and action remain available
+    /// even after Spotify marks the device idle. Cleared only on explicit disconnect/logout.
+    @Published var lastKnownTrack: SpotifyTrack?
     @Published var progressMs: Int = 0
     @Published var deviceName: String?
 
@@ -29,6 +32,7 @@ class PlaybackManager: ObservableObject {
         pollingTask = nil
         isPlaying = false
         currentTrack = nil
+        lastKnownTrack = nil
     }
 
     func togglePlayPause() {
@@ -66,11 +70,13 @@ class PlaybackManager: ObservableObject {
             guard let state = try await SpotifyAPI.shared.getPlaybackState() else { return }
             isPlaying = state.isPlaying
             currentTrack = state.item
+            if let item = state.item { lastKnownTrack = item }
             progressMs = state.progressMs ?? 0
             deviceName = state.device?.name
         } catch SpotifyAPIError.noActiveDevice {
             isPlaying = false
             currentTrack = nil
+            // Keep lastKnownTrack so the play button remains actionable
             progressMs = 0
             deviceName = nil
         } catch {
