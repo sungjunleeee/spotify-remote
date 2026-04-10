@@ -58,4 +58,5 @@ class AppSettings: ObservableObject {
 extension Notification.Name {
     static let statusBarLayoutChanged = Notification.Name("statusBarLayoutChanged")
     static let showSetupWindow = Notification.Name("showSetupWindow")
+    static let closePopover = Notification.Name("closePopover")
 }

@@ -112,7 +112,12 @@ struct NowPlayingView: View {
     private var settingsMenu: some View {
         Menu {
             Button("Settings…") {
+                NotificationCenter.default.post(name: .closePopover, object: nil)
                 openSettings()
+                NSApp.activate(ignoringOtherApps: true)
+                DispatchQueue.main.async {
+                    NSApp.windows.first { $0.title == "Settings" }?.makeKeyAndOrderFront(nil)
+                }
             }
             Divider()
             Button("Quit SpotifyController") {
