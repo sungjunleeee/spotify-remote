@@ -43,14 +43,16 @@ class StatusBarController {
 
         updateOptionalButtonVisibility()
 
-        // Update play/pause icon when playing state or track presence changes
+        // Update play/pause icon when playing state or last known track changes.
+        // lastKnownTrack survives a 204 so the play icon stays actionable after
+        // Spotify marks the device inactive (typically ~20 s after pausing).
         Publishers.CombineLatest(
             PlaybackManager.shared.$isPlaying,
-            PlaybackManager.shared.$currentTrack
+            PlaybackManager.shared.$lastKnownTrack
         )
         .receive(on: RunLoop.main)
-        .sink { [weak self] isPlaying, currentTrack in
-            self?.updatePlayPauseIcon(isPlaying: isPlaying, hasTrack: currentTrack != nil)
+        .sink { [weak self] isPlaying, lastKnownTrack in
+            self?.updatePlayPauseIcon(isPlaying: isPlaying, hasTrack: lastKnownTrack != nil)
         }
         .store(in: &cancellables)
 
@@ -67,6 +69,13 @@ class StatusBarController {
             self,
             selector: #selector(onSettingsChanged),
             name: .statusBarLayoutChanged,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(onClosePopover),
+            name: .closePopover,
             object: nil
         )
     }
@@ -137,6 +146,10 @@ class StatusBarController {
         updateOptionalButtonVisibility()
     }
 
+    @objc private func onClosePopover() {
+        closePopover()
+    }
+
     private func updatePlayPauseIcon(isPlaying: Bool, hasTrack: Bool) {
         let symbol = hasTrack ? (isPlaying ? "pause.fill" : "play.fill") : "moon.zzz.fill"
         playPauseItem.button?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
@@ -148,7 +161,9 @@ class StatusBarController {
     @objc private func handlePlayPause(_ sender: NSStatusBarButton) {
         if isRightClick {
             showPopover(from: sender)
-        } else if PlaybackManager.shared.currentTrack != nil {
+        } else if PlaybackManager.shared.lastKnownTrack != nil {
+            // Allow resume even when currentTrack is nil (device went inactive after ~20 s pause).
+            // Spotify's play endpoint reactivates the last device if the client is still running.
             PlaybackManager.shared.togglePlayPause()
         }
     }
